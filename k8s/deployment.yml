@@ -15,6 +15,7 @@ spec:
       containers:
         - name: hello-afoke
           image: afokepeniel/hello-afoke:latest # Replace with your Docker Hub image
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8080 # Port inside the container
+            - containerPort: 8080 # Spring Boot Port inside the container
 
