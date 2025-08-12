@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-afoke-service
+spec:
+  selector:
+    app: hello-afoke          # must match the labels in your Deployment's pod template
+  ports:
+    - name: http
+      port: 80                # service port (inside the cluster)
+      targetPort: 8080        # your Spring Boot app inside the container
+      nodePort: 30080         # fixed external port on the node (must be 30000–32767)
+  type: NodePort              # best for local clusters (minikube/kind)
+
+
