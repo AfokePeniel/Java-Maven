@@ -3,10 +3,11 @@ name: Maven Build → Docker Push → K8s Deploy
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch: {}
 
 jobs:
   build-deploy:
-    runs-on: self-hosted            # ← run on your machine (the runner)
+    runs-on: self-hosted       # Run on your own machine (runner installed)
 
     steps:
       - name: Checkout
@@ -28,12 +29,27 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build & push image
+      - name: Build & push Docker image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/hello-afoke:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-afoke:latest
 
-      - name: Ensure kubectl points to minikube
+      - name: Start Minikube with Kubernetes v1.30.0
+        run: |
+          if ! minikube status | grep -q "host: Running"; then
+            echo "Starting Minikube with Kubernetes v1.30.0..."
+            minikube start --kubernetes-version=v1.30.0 --driver=docker
+          else
+            echo "Minikube already running."
+          fi
+
+      - name: Set kubectl alias
+        run: |
+          alias k='kubectl'
+          echo "alias k='kubectl'" >> ~/.bashrc
+          echo "Kubectl alias set: you can use 'k' instead of 'kubectl'"
+
+      - name: Ensure kubectl points to Minikube
         run: |
           kubectl config use-context minikube
           kubectl get nodes
